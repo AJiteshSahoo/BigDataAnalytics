@@ -1,0 +1,49 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+myenv/
+
+# Generated runtime data lake, logs & test outputs
+data/
+spark-warehouse/
+metastore_db/
+derby.log
+*.log
+*.parquet
+*.jsonl
+
+# Installers & large binary archives
+*.exe
+*.msi
+*.dmg
+*.zip
+*.tar.gz
+Docker Desktop Installer.exe
+
+# Streamlit secrets (keep .streamlit/config.toml)
+.streamlit/secrets.toml
+
+# Environment variables
+.env
+.env.*
+
+# IDE / Editor / OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Testing & coverage caches
+.pytest_cache/
+.coverage
+htmlcov/
