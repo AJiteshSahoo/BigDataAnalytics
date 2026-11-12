@@ -1,4 +1,6 @@
-# 🛡️ StreamGuard: Distributed Real-Time Payment Fraud Detection & Big Data Analytics Engine
+project is made by : Aakash ( 231210001 ) , Agaz ( 231210005 ) , Ajitesh ( 231210007) 
+
+# StreamGuard: Distributed Real-Time Payment Fraud Detection & Big Data Analytics Engine
 
 StreamGuard is a production-grade Distributed Systems and Big Data Analytics project combining **Apache Kafka (KRaft Mode)**, **Apache Spark (1 Master + 2 Workers)**, **Partitioned Apache Parquet Data Lakes**, **PySpark MLlib Unsupervised K-Means Clustering**, and a **Sub-Millisecond Sliding-Window Stream Scoring Engine**.
 
@@ -6,7 +8,7 @@ It features a **Zero-Crash Graceful Degradation Architecture**: when Docker and 
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```text
 StreamGuard/
@@ -27,7 +29,7 @@ StreamGuard/
 ---
 
 
-## 🧩 Description of Architecture Components (1–3 Lines Each)
+## Description of Architecture Components (1–3 Lines Each)
 
 1. **Transaction Simulator (`simulator.py`):** Generates continuous realistic baseline payment traffic across 50 user profiles while allowing automated or manual one-click injection of anomalous fraud attacks (Velocity Bursts, Impossible Geo-Hops, and Whale Drains).
 2. **Apache Kafka Broker (`docker-compose.yml` & `kafka_bridge.py`):** Acts as the distributed, fault-tolerant streaming ingestion bus running in ZooKeeper-less KRaft mode. It uses deterministic key-based hashing ($\text{hash}(\text{user\_id}) \pmod 4$) so all events for a specific user land in the exact same partition in strict FIFO order.
@@ -39,7 +41,7 @@ StreamGuard/
 8. **Streamlit Web Dashboard & CLI Monitor (`app.py` & `run_cli.py`):** Provides the interactive frontend interface featuring live animated KPI cards, real-time Plotly anomaly charts, an explainable Fraud Alert Center, and one-click triggers for Spark batch jobs and fraud simulations.
 
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
  Category                                         Technology / Library                                             Purpose in Project |
  
@@ -67,7 +69,7 @@ StreamGuard/
 
 ---
 
-## 🚀 Step-by-Step Installation & Execution Guide
+##  Step-by-Step Installation & Execution Guide
 
 ### Step 1: Install Python Dependencies
 Open a terminal in the project folder and install the required packages:
