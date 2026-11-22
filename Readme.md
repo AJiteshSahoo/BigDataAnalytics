@@ -83,7 +83,7 @@ If Docker Desktop is running, start the distributed cluster in the background:
 ```bash
 docker compose up -d
 ```
-* **Verify Spark Master & 2 Workers UI:** Open `http://localhost:8080` in your browser to show evaluators the live Spark Master node and the 2 connected Worker nodes (`spark-worker-1` and `spark-worker-2`).
+* **Verify Spark Master & 2 Workers UI:** Open `http://localhost:8085` (or `http://localhost:8080`) in your browser to show evaluators the live Spark Master node and the 2 connected Worker nodes (`spark-worker-1` and `spark-worker-2`).
 * **Kafka Broker Port:** Active on `localhost:9092`.
 
 ### Step 3: Launch the Streamlit Web Dashboard
