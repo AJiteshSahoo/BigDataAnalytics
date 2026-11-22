@@ -83,6 +83,53 @@ class SparkAnalyticsEngine:
             self.is_spark_available = False
             self.mode = "PARQUET_ARROW_FALLBACK (Zero-Crash Mode: No JVM detected)"
 
+    def get_cluster_telemetry(self) -> Dict[str, object]:
+        """
+        Polls live Apache Spark Master cluster state via its JSON API (ports 8085 or 8080).
+        """
+        import json
+        import urllib.request
+        for port in (8085, 8080):
+            try:
+                url = f"http://localhost:{port}/json/"
+                with urllib.request.urlopen(url, timeout=0.5) as resp:
+                    if resp.status == 200:
+                        data = json.loads(resp.read().decode("utf-8"))
+                        workers = data.get("workers", [])
+                        return {
+                            "is_cluster_active": True,
+                            "master_url": data.get("url", "spark://spark-master:7077"),
+                            "master_status": data.get("status", "ALIVE"),
+                            "web_ui_url": f"http://localhost:{port}",
+                            "alive_workers_count": data.get("aliveworkers", len(workers)),
+                            "total_cores": data.get("cores", sum(w.get("cores", 0) for w in workers)),
+                            "total_memory_mb": data.get("memory", sum(w.get("memory", 0) for w in workers)),
+                            "workers": [
+                                {
+                                    "id": w.get("id", "worker"),
+                                    "address": w.get("address", "worker"),
+                                    "state": w.get("state", "ALIVE"),
+                                    "cores": w.get("cores", 2),
+                                    "memory_mb": w.get("memory", 2048),
+                                }
+                                for w in workers
+                            ],
+                            "completed_apps": data.get("completedapps", []),
+                        }
+            except Exception:
+                continue
+        return {
+            "is_cluster_active": False,
+            "master_url": "spark://localhost:7077 (Cluster offline)",
+            "master_status": "OFFLINE",
+            "web_ui_url": None,
+            "alive_workers_count": 0,
+            "total_cores": 0,
+            "total_memory_mb": 0,
+            "workers": [],
+            "completed_apps": [],
+        }
+
     def write_to_parquet(self, df: pd.DataFrame) -> Tuple[str, int]:
         """
         Saves transaction batch to Apache Parquet data lake partitioned by 'location'.

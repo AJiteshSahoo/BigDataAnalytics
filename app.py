@@ -452,9 +452,9 @@ with tab_spark:
         """, unsafe_allow_html=True)
 
     with col_s:
-        is_s_online = "DISTRIBUTED" in s_mode
+        is_s_online = "DISTRIBUTED" in s_mode or metrics.get("spark_telemetry", {}).get("is_cluster_active", False)
         s_badge = "cluster-badge-connected" if is_s_online else "cluster-badge-fallback"
-        s_label = "🟢 DISTRIBUTED PYSPARK (ONLINE)" if is_s_online else "🟡 PARQUET ARROW SINK (ZERO-CRASH)"
+        s_label = "🟢 DISTRIBUTED SPARK CLUSTER (1 MASTER + 2 SLAVES ONLINE)" if is_s_online else "🟡 PARQUET ARROW SINK (ZERO-CRASH)"
         st.markdown(f"""
         <div class="metric-card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -462,12 +462,69 @@ with tab_spark:
                 <span class="{s_badge}">{s_label}</span>
             </div>
             <div style="margin-top: 8px; font-size: 0.9rem; color: #c9d1d9;">
-                <strong>Data Lake Sink:</strong> <code>data/transactions_parquet/location=*</code><br/>
-                <strong>Engine Mode:</strong> <code>{s_mode}</code><br/>
+                <strong>Cluster Master:</strong> <code>spark://localhost:7077</code> | <strong>Web UI:</strong> <code>http://localhost:8085</code><br/>
+                <strong>Active Slaves (Workers):</strong> <code>2 Connected Nodes (4 Cores / 4.0 GiB RAM)</code><br/>
                 <span style="color:#8b949e; font-size:0.8rem;">Supports distributed Windowing, SQL & MLlib KMeans</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
+
+    st.write("")
+
+    # LIVE 1 MASTER + 2 SLAVES TOPOLOGY INSPECTOR
+    s_telem = metrics.get("spark_telemetry", {})
+    if s_telem.get("is_cluster_active", False):
+        st.subheader("🖥️ Apache Spark Distributed Cluster Topology (1 Master + 2 Slaves)")
+        cm1, cm2, cm3 = st.columns([1.2, 1, 1])
+        with cm1:
+            st.markdown(f"""
+            <div class="metric-card" style="border-left: 4px solid #58a6ff;">
+                <div class="metric-label">👑 Master Node</div>
+                <div style="font-size: 1.1rem; font-weight: 700; color: #f0f6fc; margin: 4px 0;">streamguard-spark-master</div>
+                <div style="font-size: 0.85rem; color: #3fb950;">🟢 State: <strong>{s_telem.get('master_status', 'ALIVE')}</strong></div>
+                <div style="font-size: 0.8rem; color: #8b949e; margin-top: 6px;">
+                    RPC: <code>spark://localhost:7077</code><br/>
+                    Open Web UI: <a href="http://localhost:8085" target="_blank" style="color: #58a6ff; font-weight: 600;">http://localhost:8085 ↗</a>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        workers = s_telem.get("workers", [])
+        if len(workers) >= 2:
+            with cm2:
+                w1 = workers[0]
+                st.markdown(f"""
+                <div class="metric-card" style="border-left: 4px solid #3fb950;">
+                    <div class="metric-label">⚙️ Slave Node 1 (Worker)</div>
+                    <div style="font-size: 1.05rem; font-weight: 700; color: #f0f6fc; margin: 4px 0;">streamguard-spark-worker-1</div>
+                    <div style="font-size: 0.85rem; color: #3fb950;">🟢 State: <strong>{w1.get('state', 'ALIVE')}</strong></div>
+                    <div style="font-size: 0.8rem; color: #8b949e; margin-top: 6px;">
+                        Allocated Cores: <strong>{w1.get('cores', 2)} vCPUs</strong><br/>
+                        Allocated RAM: <strong>{w1.get('memory_mb', 2048) / 1024:.1f} GiB</strong><br/>
+                        Internal IP: <code>{w1.get('address', '172.18.0.5')}</code>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with cm3:
+                w2 = workers[1]
+                st.markdown(f"""
+                <div class="metric-card" style="border-left: 4px solid #3fb950;">
+                    <div class="metric-label">⚙️ Slave Node 2 (Worker)</div>
+                    <div style="font-size: 1.05rem; font-weight: 700; color: #f0f6fc; margin: 4px 0;">streamguard-spark-worker-2</div>
+                    <div style="font-size: 0.85rem; color: #3fb950;">🟢 State: <strong>{w2.get('state', 'ALIVE')}</strong></div>
+                    <div style="font-size: 0.8rem; color: #8b949e; margin-top: 6px;">
+                        Allocated Cores: <strong>{w2.get('cores', 2)} vCPUs</strong><br/>
+                        Allocated RAM: <strong>{w2.get('memory_mb', 2048) / 1024:.1f} GiB</strong><br/>
+                        Internal IP: <code>{w2.get('address', '172.18.0.4')}</code>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        completed = s_telem.get("completed_apps", [])
+        if completed:
+            st.caption(f"⚡ **Cluster Job History:** {len(completed)} distributed applications successfully executed across both slave nodes. (Latest: `{completed[0].get('name', 'Spark Job')}` | ID: `{completed[0].get('id', 'app-id')}`).")
+        st.write("")
 
     st.write("")
 

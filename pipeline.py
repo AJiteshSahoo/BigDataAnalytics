@@ -337,6 +337,7 @@ class FraudStreamingPipeline:
                 "anomaly_counts": dict(self.anomaly_counts),
                 "kafka_status": self.kafka_bus.get_status(),
                 "spark_mode": self.spark_engine.mode,
+                "spark_telemetry": self.spark_engine.get_cluster_telemetry(),
             }
 
     def get_recent_df(self) -> pd.DataFrame:
